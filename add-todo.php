@@ -1,0 +1,132 @@
+<?php
+
+include("includes/database.php");
+include("includes/config.php");
+include("includes/functions.php");
+checkAuthorization();
+
+
+// Check if the form was submitted
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Retrieve form data
+    $name = $_POST['title'];
+    $importance = $_POST['importance'];
+    $date = $_POST['date'];
+    $formattedDate = date('Y-m-d', strtotime($date));
+    $details = $_POST['details'];
+    $color = 1;
+    $status = $_POST['state'];
+
+    // Insert data into the tl_users table
+    $query = "INSERT INTO tl_todos (name, importance, date, details, color, state ) VALUES (?, ?, ?, ?, ?, ?)";
+    $stmt = mysqli_prepare($connect, $query);
+    mysqli_stmt_bind_param($stmt, "ssssii", $name, $importance, $formattedDate, $details, $color, $status);
+    mysqli_stmt_execute($stmt);
+
+    // Check if the insertion was successful
+    if (mysqli_stmt_affected_rows($stmt) > 0) {
+        // Insertion successful
+        echo "User added successfully!";
+        header("Location: todo.php");
+    } else {
+        // Insertion failed
+        echo "Error adding user.";
+    }
+
+    // Close the statement
+    mysqli_stmt_close($stmt);
+
+    // Close the MySQLi connection
+    mysqli_close($connect);
+}
+include("includes/header.php");
+?>
+<div class="p-4 sm:ml-64">
+    <div class="p-4 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700">
+        <div class="py-8 px-4 mx-auto max-w-2xl lg:py-16">
+            <h2 class="mb-4 text-xl font-bold text-gray-900 dark:text-white">Neues To Do hinzufügen</h2>
+            <form method="post">
+                <div class="grid gap-4 sm:grid-cols-2 sm:gap-6">
+                    <div class="sm:col-span-2">
+                        <label for="title"
+                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Title</label>
+                        <input type="text" name="title" id="title"
+                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                            placeholder="Titel" required="" autocomplete="false">
+                    </div>
+                    <div>
+                        <label for="importance"
+                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Wichtigkeit</label>
+                        <select id="importance" name="importance"
+                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
+                            <option selected="">Wichtigkeit auswälen</option>
+                            <option value="Nicht Wichtig">Nicht Wichtig</option>
+                            <option value="Mittel Wichtig">Mittel Wichtig</option>
+                            <option value="Wichtig">Wichtig</option>
+                            <option value="Sehr Wichtig">Sehr Wichtig</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="date"
+                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Datum</label>
+
+                        <div class="relative max-w-sm">
+                            <div class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
+                                <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true"
+                                    xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                                    <path
+                                        d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
+                                </svg>
+                            </div>
+                            <input datepicker type="text" id="datepicker1" name="date"
+                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                placeholder="Datum auswählen">
+                        </div>
+
+                    </div>
+                    <div>
+                        <label for="state"
+                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Status</label>
+                        <select id="state" name="state"
+                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
+                            <option selected="">Status auswälen</option>
+                            <option value="1">Aktiv</option>
+                            <option value="2">Inaktiv</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="status"
+                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Uhrzeit</label>
+
+                        <div class="relative max-w-sm">
+                            <div class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
+                                <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true"
+                                    xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                                    <path
+                                        d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
+                                </svg>
+                            </div>
+                            <input datepicker type="text"
+                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                placeholder="Uhrzeit auswälen">
+                        </div>
+
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label for="details"
+                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Beschreibung</label>
+                        <textarea id="details" rows="8"name="details"
+                            class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                            placeholder="Beschreibung zum To Do"></textarea>
+                    </div>
+                </div>
+                <button type="submit"
+                    class="mt-4 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Absenden</button>
+            </form>
+        </div>
+    </div>
+</div>
+<?php
+
+include("includes/footer.php")
+    ?>
